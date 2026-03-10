@@ -126,14 +126,7 @@ pip install -r requirements.txt
 
 # 📷 Screenshots
 
-Example:
-
-```
-/screenshots/app-interface.png
-```
-
----
-
+[GlycoSense Web Interface](ui_preview.png.png)
 
 # 👩‍💻 Author
 
