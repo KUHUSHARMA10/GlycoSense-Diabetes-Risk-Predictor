@@ -1,0 +1,29 @@
+okay so,
+Diabetes distribution
+0 → 91500
+1 → 8500
+91.5% people don't have diabetes
+8.5% have diabetes
+This is class imbalance, so the model may predict “No diabetes” most of the time.
+
+Blood glucose
+Non-diabetic → 132
+Diabetic → 194
+People with diabetes have much higher glucose levels, so this is a strong predictor.
+
+HbA1c
+Non-diabetic → 5.39
+Diabetic → 6.93
+Higher HbA1c → higher chance of diabetes.
+Another strong predictor.
+
+Hypertension
+No hypertension → 6.9%
+Hypertension → 27.9%
+People with hypertension are much more likely to have diabetes.
+
+Heart disease
+No heart disease → 7.5%
+Heart disease → 32.1%
+People with heart disease have a very high diabetes rate.
+

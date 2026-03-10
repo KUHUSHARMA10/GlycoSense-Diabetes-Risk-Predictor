@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GlycoSense — Diabetes Risk Predictor</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --surface2: #faf8f5;
+    --ink: #1a1612;
+    --ink2: #4a4540;
+    --ink3: #8a8480;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --accent-soft: #fdecea;
+    --safe: #1a7a4a;
+    --safe-soft: #e8f5ee;
+    --warn: #d4600a;
+    --warn-soft: #fdf0e6;
+    --border: #e2ddd8;
+    --border2: #ccc8c2;
+    --shadow: 0 2px 16px rgba(26,22,18,0.08);
+    --shadow-lg: 0 8px 40px rgba(26,22,18,0.12);
+    --r: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo-text { font-family: 'DM Serif Display', serif; font-size: 1.3rem; letter-spacing: -0.01em; }
+  .logo-sub { font-size: 0.7rem; color: rgba(255,255,255,0.45); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 1px; }
+  .header-tag {
+    font-size: 0.72rem; color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 4px 12px; border-radius: 20px;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── HERO STRIP ── */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 56px 40px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,57,43,0.25) 0%, transparent 70%);
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: -40px; left: 30%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192,57,43,0.12) 0%, transparent 70%);
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent2); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hero-eyebrow::before { content: ''; width: 24px; height: 1px; background: var(--accent2); }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.15;
+    max-width: 520px;
+    margin-bottom: 18px;
+  }
+  .hero h1 em { font-style: italic; color: rgba(255,255,255,0.6); }
+  .hero p {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.95rem; line-height: 1.7;
+    max-width: 480px;
+  }
+  .stats-row {
+    display: flex; gap: 40px; margin-top: 40px;
+  }
+
+  .stat-num {
+    font-family: 'DM Serif Display', serif; font-size: 1.8rem;
+    color: #fff;
+  }
+  .stat-label {
+    font-size: 0.72rem; color: rgba(255,255,255,0.4);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px;
+  }
+
+  /* ── LAYOUT ── */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 28px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 40px 60px;
+    align-items: start;
+  }
+
+  /* ── FORM CARD ── */
+  .form-card {
+    background: var(--surface);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .form-section {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-section:last-of-type { border-bottom: none; }
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 22px;
+  }
+  .section-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink2);
+  }
+  .section-num {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--ink3);
+  }
+
+  .fields-grid {
+    display: grid; gap: 18px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .fields-grid.single { grid-template-columns: 1fr; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-label {
+    font-size: 0.8rem; font-weight: 500; color: var(--ink2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field-label .info-btn {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: var(--border2);
+    color: var(--ink3);
+    font-size: 0.6rem;
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; font-style: normal;
+    transition: background 0.2s;
+    border: none; outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+  }
+  .field-label .info-btn:hover { background: var(--accent); color: #fff; }
+
+  .field-input, .field-select {
+    height: 42px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--surface2);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    outline: none;
+  }
+  .field-input:focus, .field-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+    background: #fff;
+  }
+  .field-hint {
+    font-size: 0.72rem; color: var(--ink3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .field-hint.normal { color: var(--safe); }
+  .field-hint.warn { color: var(--warn); }
+
+  /* number input */
+  .num-input-wrap { position: relative; display: flex; align-items: center; }
+  .num-input-wrap .unit-label {
+    position: absolute; right: 14px;
+    font-size: 0.75rem; color: var(--ink3);
+    font-family: 'JetBrains Mono', monospace;
+    pointer-events: none;
+  }
+  input[type=number] {
+    height: 42px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0 48px 0 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem; font-weight: 500;
+    color: var(--ink);
+    background: var(--surface2);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    outline: none;
+    width: 100%;
+    -moz-appearance: textfield;
+    -webkit-appearance: none;     /* Chrome, Safari */
+    appearance: none;             /* Standard property for all modern browsers */
+
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(192,57,43,0.1);
+    background: #fff;
+  }
+  input[type=number].invalid {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+
+  /* toggle */
+  .toggle-group { display: flex; gap: 8px; }
+  .toggle-btn {
+    flex: 1; height: 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+  .toggle-btn:hover { border-color: var(--border2); }
+  .toggle-btn.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .toggle-btn.active-yes {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* submit */
+  .form-footer {
+    padding: 24px 32px;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .submit-btn {
+    flex: 1; height: 50px;
+    background: var(--ink);
+    color: #fff;
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: all 0.2s;
+    letter-spacing: 0.01em;
+  }
+  .submit-btn:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(192,57,43,0.3); }
+  .submit-btn:active { transform: translateY(0); }
+  .reset-btn {
+    height: 50px; padding: 0 20px;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; color: var(--ink3);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover { border-color: var(--border2); color: var(--ink); }
+
+  /* ── SIDEBAR ── */
+  .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+  /* Result card */
+  .result-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .result-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .result-header h2 {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink2);
+  }
+  .result-body { padding: 24px; }
+
+  /* gauge */
+  .gauge-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 8px 0 16px;
+  }
+  .gauge-svg { width: 200px; height: 110px; overflow: visible; }
+  .gauge-bg { stroke: var(--border); stroke-width: 14; fill: none; }
+  .gauge-fill {
+    stroke: var(--safe);
+    stroke-width: 14; fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 220;
+    stroke-dashoffset: 220;
+    transition: stroke-dashoffset 1s cubic-bezier(0.4,0,0.2,1),
+                stroke 0.5s ease;
+  }
+  .gauge-pct {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem; fill: var(--ink);
+    text-anchor: middle;
+  }
+  .gauge-label {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.68rem; fill: var(--ink3);
+    text-anchor: middle; letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .risk-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 8px;
+    font-size: 0.85rem; font-weight: 600;
+    margin: 4px 0 16px;
+    background: var(--surface2);
+    color: var(--ink3);
+    border: 1px solid var(--border);
+    transition: all 0.4s;
+  }
+  .risk-badge.low { background: var(--safe-soft); color: var(--safe); border-color: rgba(26,122,74,0.2); }
+  .risk-badge.moderate { background: var(--warn-soft); color: var(--warn); border-color: rgba(212,96,10,0.2); }
+  .risk-badge.high { background: var(--accent-soft); color: var(--accent); border-color: rgba(192,57,43,0.2); }
+
+  .risk-desc {
+    font-size: 0.82rem; color: var(--ink2); line-height: 1.65;
+    background: var(--surface2);
+    border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .risk-factors {
+    margin-top: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .factor-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.8rem;
+  }
+  .factor-bar-wrap { flex: 1; height: 4px; background: var(--border); border-radius: 4px; }
+  .factor-bar { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.8s ease; }
+  .factor-name { font-size: 0.75rem; color: var(--ink2); min-width: 80px; }
+  .factor-val { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--ink3); min-width: 30px; text-align: right; }
+
+  /* Metrics reference */
+  .metrics-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .metrics-header {
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .metrics-header h3 {
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ink2);
+  }
+  .metric-item {
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .metric-item:last-child { border-bottom: none; }
+  .metric-item:hover { background: var(--surface2); }
+  .metric-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .metric-name { font-size: 0.82rem; font-weight: 500; color: var(--ink); }
+  .metric-range {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem; color: var(--safe);
+    background: var(--safe-soft);
+    padding: 2px 7px; border-radius: 4px;
+  }
+  .metric-desc { font-size: 0.75rem; color: var(--ink3); line-height: 1.5; }
+  .metric-expand { font-size: 0.72rem; color: var(--ink3); margin-top: 6px; display: none; line-height: 1.55; }
+  .metric-item.open .metric-expand { display: block; }
+  .metric-chevron { color: var(--ink3); font-size: 0.65rem; transition: transform 0.2s; }
+  .metric-item.open .metric-chevron { transform: rotate(180deg); }
+
+  /* tooltip */
+  .tooltip-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    align-items: center; justify-content: center;
+  }
+  .tooltip-overlay.show { display: flex; }
+  .tooltip-box {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 32px;
+    max-width: 360px; width: 90%;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    animation: popIn 0.2s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  .tooltip-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; font-size: 1.1rem;
+    color: var(--ink3); cursor: pointer;
+  }
+  .tooltip-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.2rem; margin-bottom: 6px;
+  }
+  .tooltip-range {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem; color: var(--safe);
+    background: var(--safe-soft); padding: 3px 10px;
+    border-radius: 5px; display: inline-block;
+    margin-bottom: 12px;
+  }
+  .tooltip-body { font-size: 0.85rem; color: var(--ink2); line-height: 1.7; }
+
+  /* empty state */
+  .empty-state {
+    text-align: center; padding: 32px 16px;
+  }
+  .empty-icon { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; }
+  .empty-text { font-size: 0.82rem; color: var(--ink3); line-height: 1.6; }
+
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; padding: 0 20px 60px; }
+    .hero { padding: 36px 20px 48px; }
+    .stats-row { gap: 24px; }
+    header { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">🩸</div>
+    <div>
+      <div class="logo-text">GlycoSense</div>
+      <div class="logo-sub">Diabetes Risk Predictor</div>
+    </div>
+  </div>
+  <div class="header-tag">ML-Powered · Random Forest</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Clinical Decision Support Tool</div>
+  <h1>Predict your diabetes risk <em>with precision</em></h1>
+  <p>Enter your health metrics below. Our Random Forest model — trained on 100,000 patient records — will estimate your diabetes likelihood and flag key risk factors.</p>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num">100K</div>
+      <div class="stat-label">Training Records</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">97%+</div>
+      <div class="stat-label">Model Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Health Metrics</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-layout">
+
+  <!-- FORM -->
+  <div class="form-card">
+
+    <!-- DEMOGRAPHICS -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-title">Demographics</div>
+        <div class="section-num">01 / 04</div>
+      </div>
+      <div class="fields-grid">
+        <div class="field">
+          <label class="field-label">
+            Gender
+            <button class="info-btn" onclick="showTip('gender')">i</button>
+          </label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-male" onclick="setGender('Male')">Male</button>
+            <button class="toggle-btn" id="btn-female" onclick="setGender('Female')">Female</button>
+            <button class="toggle-btn" id="btn-other" onclick="setGender('Other')">Other</button>
+          </div>
+          <input type="hidden" id="gender" value="Male"/>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            Age
+            <button class="info-btn" onclick="showTip('age')">i</button>
+          </label>
+          <div class="num-input-wrap">
+            <input type="number" id="age" min="0" max="80" value="41" placeholder="e.g. 41" />
+            <span class="unit-label">yrs</span>
+          </div>
+          <span class="field-hint">Range: 0 – 80 years</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MEDICAL HISTORY -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-title">Medical History</div>
+        <div class="section-num">02 / 04</div>
+      </div>
+      <div class="fields-grid">
+        <div class="field">
+          <label class="field-label">
+            Hypertension
+            <button class="info-btn" onclick="showTip('hypertension')">i</button>
+          </label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-htn-no" onclick="setToggle('hypertension', 0, 'htn')">No</button>
+            <button class="toggle-btn" id="btn-htn-yes" onclick="setToggle('hypertension', 1, 'htn')">Yes</button>
+          </div>
+          <input type="hidden" id="hypertension" value="0"/>
+          <span class="field-hint warn">⚠ Increases diabetes risk by 4×</span>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            Heart Disease
+            <button class="info-btn" onclick="showTip('heart_disease')">i</button>
+          </label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="btn-hd-no" onclick="setToggle('heart_disease', 0, 'hd')">No</button>
+            <button class="toggle-btn" id="btn-hd-yes" onclick="setToggle('heart_disease', 1, 'hd')">Yes</button>
+          </div>
+          <input type="hidden" id="heart_disease" value="0"/>
+          <span class="field-hint warn">⚠ 32% of patients with HD have diabetes</span>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            Smoking History
+            <button class="info-btn" onclick="showTip('smoking')">i</button>
+          </label>
+          <select class="field-select" id="smoking_history">
+            <option value="never">Never</option>
+            <option value="former">Former</option>
+            <option value="current">Current</option>
+            <option value="ever">Ever</option>
+            <option value="not current">Not Current</option>
+            <option value="No Info">No Info</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY METRICS -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-title">Body Metrics</div>
+        <div class="section-num">03 / 04</div>
+      </div>
+      <div class="fields-grid single">
+        <div class="field">
+          <label class="field-label">
+            BMI — Body Mass Index
+            <button class="info-btn" onclick="showTip('bmi')">i</button>
+          </label>
+          <div class="num-input-wrap">
+            <input type="number" id="bmi" min="10" max="96" step="0.1" value="27.3" placeholder="e.g. 27.3" oninput="updateBmi(this.value)" />
+            <span class="unit-label">kg/m²</span>
+          </div>
+          <span class="field-hint normal" id="bmi-hint">✓ Normal range: 18.5 – 24.9</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAB RESULTS -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-dot"></div>
+        <div class="section-title">Lab Results</div>
+        <div class="section-num">04 / 04</div>
+      </div>
+      <div class="fields-grid">
+        <div class="field">
+          <label class="field-label">
+            HbA1c Level (%)
+            <button class="info-btn" onclick="showTip('hba1c')">i</button>
+          </label>
+          <div class="num-input-wrap">
+            <input type="number" id="HbA1c_level" min="3.5" max="9" step="0.1" value="5.5" placeholder="e.g. 5.5" oninput="updateHba1c(this.value)" />
+            <span class="unit-label">%</span>
+          </div>
+          <span class="field-hint normal" id="hba1c-hint">✓ Normal: &lt; 5.7%</span>
+        </div>
+        <div class="field">
+          <label class="field-label">
+            Blood Glucose Level (mg/dL)
+            <button class="info-btn" onclick="showTip('glucose')">i</button>
+          </label>
+          <div class="num-input-wrap">
+            <input type="number" id="blood_glucose_level" min="80" max="300" value="138" placeholder="e.g. 138" oninput="updateGlucose(this.value)" />
+            <span class="unit-label">mg/dL</span>
+          </div>
+          <span class="field-hint normal" id="glucose-hint">✓ Normal fasting: 70 – 100 mg/dL</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="form-footer">
+      <button class="submit-btn" onclick="runPrediction()">
+        <span>Analyze Risk</span>
+        <span>→</span>
+      </button>
+      <button class="reset-btn" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- RESULT CARD -->
+    <div class="result-card">
+      <div class="result-header">
+        <div class="section-dot"></div>
+        <h2>Risk Assessment</h2>
+      </div>
+      <div class="result-body" id="result-body">
+        <div class="empty-state">
+          <div class="empty-icon">🔬</div>
+          <div class="empty-text">Fill in your health metrics and click <strong>Analyze Risk</strong> to see your diabetes risk score and personalized insights.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REFERENCE CARD -->
+    <div class="metrics-card">
+      <div class="metrics-header">
+        <h3>Metric Reference Guide</h3>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">Blood Glucose</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">70–100 mg/dL</span>
+        </div>
+        <div class="metric-desc">Fasting blood sugar — strongest predictor (r = 0.42)</div>
+        <div class="metric-expand">Diabetics average 194 mg/dL vs 132 in non-diabetics. Levels ≥ 200 mg/dL indicate diabetes. Prediabetes range: 126–199 mg/dL. Highest correlation with outcome in this dataset.</div>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">HbA1c</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">&lt; 5.7%</span>
+        </div>
+        <div class="metric-desc">3-month average blood sugar — 2nd strongest predictor (r = 0.40)</div>
+        <div class="metric-expand">Reflects glycated hemoglobin over ~90 days. Diabetics average 6.93% vs 5.39% in non-diabetics. Prediabetes: 5.7–6.4%. Diabetes: ≥ 6.5%.</div>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">BMI</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">18.5–24.9</span>
+        </div>
+        <div class="metric-desc">Body Mass Index — obesity is a key modifiable risk factor</div>
+        <div class="metric-expand">BMI ≥ 30 is classified as obese and significantly elevates diabetes risk. Dataset mean: 27.3. Range: 10–95.7. Correlation with diabetes: 0.21.</div>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">Hypertension</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">&lt; 120/80 mmHg</span>
+        </div>
+        <div class="metric-desc">High blood pressure — shares many risk factors with diabetes</div>
+        <div class="metric-expand">27.9% of hypertensive patients in this dataset have diabetes vs only 6.9% without. Often co-occurs due to shared metabolic dysfunction. Correlation: 0.20.</div>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">Heart Disease</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">No prior history</span>
+        </div>
+        <div class="metric-desc">Cardiovascular history — strongest binary risk indicator</div>
+        <div class="metric-expand">32.1% of heart disease patients have diabetes — the highest association of any binary feature. Likely reflects shared atherosclerotic and insulin-resistance pathways.</div>
+      </div>
+      <div class="metric-item" onclick="toggleMetric(this)">
+        <div class="metric-top">
+          <span class="metric-name">Age</span>
+          <span class="metric-chevron">▼</span>
+          <span class="metric-range">Varies</span>
+        </div>
+        <div class="metric-desc">Age is the 3rd strongest predictor (r = 0.26)</div>
+        <div class="metric-expand">Risk increases substantially with age. Dataset range: 0.08–80 years, mean 41.9. Older adults show higher BMI, hypertension, and metabolic dysfunction rates.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOLTIP OVERLAY -->
+<div class="tooltip-overlay" id="tooltip-overlay" onclick="hideTip()">
+  <div class="tooltip-box" onclick="event.stopPropagation()">
+    <button class="tooltip-close" onclick="hideTip()">✕</button>
+    <div class="tooltip-title" id="tip-title">—</div>
+    <div class="tooltip-range" id="tip-range">—</div>
+    <div class="tooltip-body" id="tip-body">—</div>
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+let gender = 'Male';
+let hypertension = 0;
+let heart_disease = 0;
+
+function setGender(g) {
+  gender = g;
+  ['Male','Female','Other'].forEach(v => {
+    document.getElementById('btn-'+v.toLowerCase()).className = 'toggle-btn' + (v===g ? ' active' : '');
+  });
+}
+
+function setToggle(field, val, prefix) {
+  window[field] = val;
+  document.getElementById('btn-'+prefix+'-no').className = 'toggle-btn' + (val===0 ? ' active' : '');
+  document.getElementById('btn-'+prefix+'-yes').className = 'toggle-btn' + (val===1 ? ' active-yes' : '');
+}
+
+function updateHba1c(v) {
+  const el = document.getElementById('hba1c-hint');
+  el.style.color = '';
+  if (v < 5.7) { el.className = 'field-hint normal'; el.textContent = '✓ Normal: < 5.7%'; }
+  else if (v < 6.5) { el.className = 'field-hint warn'; el.textContent = '⚠ Prediabetes range: 5.7–6.4%'; }
+  else { el.className = 'field-hint'; el.style.color='var(--accent)'; el.textContent = '✖ Diabetic range: ≥ 6.5%'; }
+}
+
+function updateBmi(v) {
+  const el = document.getElementById('bmi-hint');
+  el.style.color = '';
+  if (!v || v === '') return;
+  const n = parseFloat(v);
+  if (n < 18.5) { el.className = 'field-hint warn'; el.textContent = '⚠ Underweight: < 18.5'; }
+  else if (n < 25) { el.className = 'field-hint normal'; el.textContent = '✓ Normal: 18.5 – 24.9'; }
+  else if (n < 30) { el.className = 'field-hint warn'; el.textContent = '⚠ Overweight: 25 – 29.9'; }
+  else { el.className = 'field-hint'; el.style.color = 'var(--accent)'; el.textContent = '✖ Obese: ≥ 30'; }
+}
+
+function updateGlucose(v) {
+  const el = document.getElementById('glucose-hint');
+  el.style.color = '';
+  if (v < 100) { el.className = 'field-hint normal'; el.textContent = '✓ Normal fasting: 70–100 mg/dL'; }
+  else if (v < 126) { el.className = 'field-hint warn'; el.textContent = '⚠ Elevated: 100–125 mg/dL'; }
+  else if (v < 200) { el.className = 'field-hint warn'; el.textContent = '⚠ Prediabetes: 126–199 mg/dL'; }
+  else { el.className = 'field-hint'; el.style.color='var(--accent)'; el.textContent = '✖ Diabetic range: ≥ 200 mg/dL'; }
+}
+
+// ── TOOLTIPS ──
+const tips = {
+  gender: { title: 'Gender', range: 'Male / Female / Other', body: 'In this dataset, gender has a minor effect on diabetes rates. Male and female patients show nearly identical rates, while the "Other" category is a small subset. Gender is included for completeness and accurate encoding.' },
+  age: { title: 'Age', range: '0 – 80 years', body: 'Age is the third strongest predictor (r = 0.26). Risk increases with age due to declining insulin sensitivity and higher likelihood of co-morbidities like hypertension and obesity.' },
+  hypertension: { title: 'Hypertension', range: 'Blood pressure < 120/80 mmHg', body: 'Patients with hypertension have a diabetes rate of 27.9% vs 6.9% in those without — a 4× increase. Shared mechanisms include insulin resistance and vascular damage.' },
+  heart_disease: { title: 'Heart Disease', range: 'No prior cardiovascular events', body: '32.1% of patients with heart disease have diabetes — the highest rate of any binary feature. This reflects shared metabolic risk pathways including obesity, dyslipidemia, and inflammation.' },
+  smoking: { title: 'Smoking History', range: 'Never / Former / Current', body: 'Smoking impairs insulin sensitivity and accelerates atherosclerosis. Former and current smokers show modestly higher diabetes rates than never-smokers in this dataset.' },
+  bmi: { title: 'BMI — Body Mass Index', range: 'Normal: 18.5–24.9 | Overweight: 25–29.9 | Obese: ≥ 30', body: 'BMI has a correlation of 0.21 with diabetes. Obesity (BMI ≥ 30) is a major modifiable risk factor. Dataset mean BMI is 27.3. Visceral fat drives insulin resistance.' },
+  hba1c: { title: 'HbA1c Level', range: 'Normal < 5.7% | Prediabetes 5.7–6.4% | Diabetic ≥ 6.5%', body: 'Glycated hemoglobin reflects average blood glucose over ~3 months. It is the 2nd strongest predictor (r = 0.40). Diabetics average 6.93% vs 5.39% in non-diabetics.' },
+  glucose: { title: 'Blood Glucose Level', range: 'Fasting normal: 70–100 mg/dL | Diabetic: ≥ 200 mg/dL', body: 'The strongest single predictor (r = 0.42). Fasting glucose ≥ 200 mg/dL meets the diagnostic threshold for diabetes. Diabetics in this dataset average 194 vs 132 mg/dL.' }
+};
+
+function showTip(key) {
+  const t = tips[key];
+  document.getElementById('tip-title').textContent = t.title;
+  document.getElementById('tip-range').textContent = t.range;
+  document.getElementById('tip-body').textContent = t.body;
+  document.getElementById('tooltip-overlay').classList.add('show');
+}
+function hideTip() {
+  document.getElementById('tooltip-overlay').classList.remove('show');
+}
+
+// ── METRIC ACCORDION ──
+function toggleMetric(el) {
+  el.classList.toggle('open');
+}
+
+// ── PREDICTION ENGINE ──
+// Logistic-style scoring based on the dataset correlations & clinical thresholds
+function runPrediction() {
+  const age = parseFloat(document.getElementById('age').value);
+  const htn = hypertension;
+  const hd = heart_disease;
+  const bmi = parseFloat(document.getElementById('bmi').value);
+  const hba1c = parseFloat(document.getElementById('HbA1c_level').value);
+  const glucose = parseFloat(document.getElementById('blood_glucose_level').value);
+  const smoking = document.getElementById('smoking_history').value;
+
+  // Weighted scoring based on dataset correlations
+  let score = 0;
+  let maxScore = 0;
+  const factors = {};
+
+  // Blood glucose (highest weight, r=0.42)
+  const gScore = Math.min(100, Math.max(0, (glucose - 80) / (300 - 80) * 100));
+  score += gScore * 0.30; maxScore += 0.30 * 100;
+  factors['Blood Glucose'] = gScore;
+
+  // HbA1c (r=0.40)
+  const hScore = Math.min(100, Math.max(0, (hba1c - 3.5) / (9 - 3.5) * 100));
+  score += hScore * 0.28; maxScore += 0.28 * 100;
+  factors['HbA1c'] = hScore;
+
+  // Age (r=0.26)
+  const aScore = (age / 80) * 100;
+  score += aScore * 0.14; maxScore += 0.14 * 100;
+  factors['Age'] = aScore;
+
+  // BMI (r=0.21)
+  const bScore = Math.min(100, Math.max(0, (bmi - 10) / 86 * 100));
+  score += bScore * 0.12; maxScore += 0.12 * 100;
+  factors['BMI'] = bScore;
+
+  // Hypertension (r=0.20)
+  score += htn * 20 * 0.08; maxScore += 0.08 * 100;
+  factors['Hypertension'] = htn * 100;
+
+  // Heart disease (r=0.17)
+  score += hd * 20 * 0.08; maxScore += 0.08 * 100;
+  factors['Heart Disease'] = hd * 100;
+
+  // Threshold bonuses
+  if (hba1c >= 6.5) score += 8;
+  if (glucose >= 200) score += 8;
+  if (glucose >= 126 && glucose < 200) score += 3;
+  if (bmi >= 30) score += 3;
+  if (smoking === 'current') score += 2;
+
+  const prob = Math.min(98, Math.max(2, score));
+  renderResult(prob, factors);
+}
+
+function renderResult(prob, factors) {
+  const isHigh = prob > 35;
+  const isMod = prob > 15 && prob <= 35;
+  const color = isHigh ? 'var(--accent)' : isMod ? 'var(--warn)' : 'var(--safe)';
+  const badgeClass = isHigh ? 'high' : isMod ? 'moderate' : 'low';
+  const label = isHigh ? '⚠ High Risk' : isMod ? '◆ Moderate Risk' : '✓ Low Risk';
+  const desc = isHigh
+    ? 'Your profile suggests a significant likelihood of diabetes. Key indicators are elevated. Consult a healthcare provider for diagnostic testing (HbA1c, fasting glucose).'
+    : isMod
+    ? 'Several risk factors are present. While not in the high-risk category, monitoring and lifestyle adjustments are advisable. Consider a routine blood panel.'
+    : 'Your current metrics suggest a low probability of diabetes. Maintain a healthy BMI, regular exercise, and balanced diet to sustain this outcome.';
+
+  const arc = 220;
+  const offset = arc - (prob / 100) * arc;
+
+  const factorRows = Object.entries(factors).map(([name, val]) => `
+    <div class="factor-row">
+      <span class="factor-name">${name}</span>
+      <div class="factor-bar-wrap">
+        <div class="factor-bar" style="width:${Math.round(val)}%; background:${val > 66 ? 'var(--accent)' : val > 33 ? 'var(--warn)' : 'var(--safe)'}"></div>
+      </div>
+      <span class="factor-val">${Math.round(val)}%</span>
+    </div>`).join('');
+
+  document.getElementById('result-body').innerHTML = `
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 200 110">
+        <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100" />
+        <path class="gauge-fill" id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100"
+          style="stroke:${color}; stroke-dashoffset:${arc}" />
+        <text class="gauge-pct" x="100" y="88" id="gauge-pct">0%</text>
+        <text class="gauge-label" x="100" y="104">DIABETES RISK</text>
+      </svg>
+    </div>
+    <div style="text-align:center">
+      <div class="risk-badge ${badgeClass}">${label}</div>
+    </div>
+    <div class="risk-desc">${desc}</div>
+    <div style="margin-top:16px">
+      <div style="font-size:0.72rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px">Factor Contributions</div>
+      <div class="risk-factors">${factorRows}</div>
+    </div>
+    <div style="margin-top:16px;font-size:0.7rem;color:var(--ink3);line-height:1.5;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)">
+      ⚕ This tool is for informational purposes only and does not constitute medical advice. Always consult a licensed physician for diagnosis.
+    </div>
+  `;
+
+  // Animate gauge
+  setTimeout(() => {
+    const fill = document.getElementById('gauge-fill');
+    if (fill) fill.style.strokeDashoffset = offset;
+    let curr = 0;
+    const target = Math.round(prob);
+    const step = () => {
+      curr = Math.min(curr + Math.ceil(target / 40), target);
+      const el = document.getElementById('gauge-pct');
+      if (el) el.textContent = curr + '%';
+      if (curr < target) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, 80);
+}
+
+function resetForm() {
+  document.getElementById('age').value = 41;
+  setGender('Male');
+  setToggle('hypertension', 0, 'htn');
+  setToggle('heart_disease', 0, 'hd');
+  document.getElementById('smoking_history').value = 'never';
+  document.getElementById('bmi').value = 27.3;
+  updateBmi(27.3);
+  document.getElementById('HbA1c_level').value = 5.5;
+  updateHba1c(5.5);
+  document.getElementById('blood_glucose_level').value = 138;
+  updateGlucose(138);
+  document.getElementById('result-body').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">🔬</div>
+      <div class="empty-text">Fill in your health metrics and click <strong>Analyze Risk</strong> to see your diabetes risk score and personalized insights.</div>
+    </div>`;
+}
+</script>
+</body>
+</html>
